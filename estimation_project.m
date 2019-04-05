@@ -33,15 +33,16 @@ steps = 50;
 
 w_fft = zeros(1, steps);
 phi_fft = zeros(1, steps);
-var_w_hat = zeros(1, 8);
-var_phi_hat = zeros(1, 8);
+var_error_w = zeros(1, 8);
+var_error_phi = zeros(1, 8);
 phi_error = zeros(1, steps);
 w_error = zeros(1, steps);
 CRLB_w = zeros(1, 8);
 CRLB_phi = zeros(1,8);
-w_mle = zeros(1, 8);
-phi_mle = zeros(1, 8);
+w_mle = zeros(1, steps);
+phi_mle = zeros(1, steps);
 var_w_min = zeros(1,8);
+var_phi_min = zeros(1,8);
 
 
 for j=1:6
@@ -69,6 +70,18 @@ for j=1:6
 
                 phi_fft(j_2) = angle(exp(-1i*w_fft(j_2)*n_0*T).*(x_fft(m)));
                 phi_error(j_2) = (phi - phi_fft(j_2)).^2;
+                
+                 if k(j) == 10
+                    func = @(w, p) sum(abs(x - A*exp(1i*(w*n*T + phi))));
+
+                    [vals, ~, exitflag, output] = fminsearch(@(input) func(input(1), input(2)), [mean(w_fft), mean(phi_fft)]);
+
+                    w_mle(j_2) = vals(1);
+
+                    phi_mle(j_2) = vals(2);
+                    
+                 end 
+    
            end 
            
            CRLB_w(j_1) = (12.*(sigma(j_1)).^2)/(A.^2.*T.^2.*N.*(N.^2-1));
@@ -77,50 +90,60 @@ for j=1:6
            var_error_w(j_1) =(1/steps)*(sum(w_error));
            var_error_phi(j_1) = (1/steps)*(sum(phi_error));
            
+           var_w_min(j_1) = var(w_0 - w_mle);
+           var_phi_min(j_1) = var(phi - phi_mle);
            
-          if k(j) == 10
-            func = @(w, p) sum(abs(x - A*exp(1i*(w*n*T + phi))));
-
-            [vals, ~, exitflag, output] = fminsearch(@(input) func(input(1), input(2)), [mean(w_fft), mean(phi_fft)]);
-
-            w_mle(j_1) = vals(1);
-            
-            phi_mle(j_1) = vals(2);
-            
-            var_w_min(j_1) = var(w_0 - w_mle(j_1));
-            
-            
-
-            fprintf('Estimated w: %.0f (%.3f%% off)\n', w_mle(j_1), 100*(w_mle(j_1) - w_0)/w_0);
-            fprintf('Estimated phi: %f (%.3f%% off)\n', phi_mle(j_1),100*(phi_mle(j_1) - phi)/phi)
-            fprintf('SNR: %f \n', snr(j_1)); 
-            
-          end 
-    
+            if k(j) == 10
+                fprintf('Estimated w: %.0f (%.3f%% off)\n', mean(w_mle), 100*(mean(w_mle) - w_0)/w_0);
+                fprintf('Estimated phi: %f (%.3f%% off)\n', mean(phi_mle),100*(mean(phi_mle) - phi)/phi);
+                fprintf('SNR: %f \n', snr(j_1)); 
+            end      
     end
     figure(1); 
-    %semilogy((snr), CRLB_w ); hold on;
-    %semilogy((snr), var_error_w ); hold on;
+    semilogy((snr), CRLB_w ); hold on;
+    semilogy((snr), var_error_w ); hold on;
     grid
     
-    %figure(2); 
-    %semilogy((snr), CRLB_phi ); hold on;
-    %semilogy((snr), var_error_phi ); hold on; 
+    figure(2); 
+    semilogy((snr), CRLB_phi ); hold on;
+    semilogy((snr), var_error_phi ); hold on; 
     grid
     
     figure(3)
-    semilogy((snr), CRLB_w, 'r'); hold on;
-    semilogy((snr), var_w_min, 'g'); hold on;
+    semilogy((snr), CRLB_w); hold on;
+    semilogy((snr), var_w_min); hold on;
     grid;
     
     figure(4)
-    semilogy((snr), CRLB_phi, 'r'); hold on;
-    semilogy((snr), phi_mle, 'b'); hold on;
+    semilogy((snr), CRLB_phi); hold on;
+    semilogy((snr), var_phi_min); hold on;
     grid;
 end
 
 %plotting
 figure(1)
-legend('CRLB', '10', '12', '14', '16', '18', '20');
+title('Preformance of \omega_{fft}')
+xlabel('SNR [dB]') 
+ylabel('var(\omega_{fft})') 
+legend('CRLB', '2^{10}', '2^{12}', '2^{14}', '2^{16}', '2^{18}', '2^{20}');
+
 figure(2)
-legend('CRLB', '10', '12', '14', '16', '18', '20');
+title('Preformance of \phi_{fft}')
+xlabel('SNR [dB]') 
+ylabel('var(\phi_{fft})') 
+legend('CRLB', '2^{10}', '2^{12}', '2^{14}', '2^{16}', '2^{18}', '2^{20}');
+
+figure(3)
+title('\omega_{mle} using fminsearch')
+xlabel('SNR [dB]') 
+ylabel('var(\omega_{mle})') 
+legend('CRLB', '2^{10}');
+
+figure(4)
+title('\phi_{mle} using fminsearch')
+xlabel('SNR [dB]') 
+ylabel('var(\phi_{mle})') 
+legend('CRLB', '2^{10}');
+
+
+
