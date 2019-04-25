@@ -29,7 +29,7 @@ q = 1;
 %The signal of x
 signal = A.*exp(1i.*(w_0.*n.*T+phi));
 
-steps = 100;
+steps = 500;
 
 w_fft = zeros(1, steps);
 phi_fft = zeros(1, steps);
@@ -104,7 +104,7 @@ for j=1:6
             end      
     end
     
-    %{
+    
     figure(1); 
     semilogy((snr), var_error_w ); hold on;
     grid
@@ -113,7 +113,7 @@ for j=1:6
     figure(2);
     semilogy((snr), var_error_phi ); hold on; 
     grid
-   %}
+  
     
     figure(3)
     semilogy((snr), var_w_min); hold on;
@@ -132,7 +132,7 @@ for i_1 = 1:8
     CRLB_w(i_1) = (12.*(sigma(i_1)).^2)/(A.^2.*T.^2.*N.*(N.^2-1));
     CRLB_phi(i_1) = ((12.*(sigma(i_1)).^2).*(n_0.^2.*N+2.*n_0.*P+Q))./(A.^2.*N.^2.*(N.^2-1));
     
-    %{
+   
     figure(1); 
     semilogy((snr), CRLB_w, 'r' ); hold on;
     grid
@@ -141,7 +141,7 @@ for i_1 = 1:8
     semilogy((snr), CRLB_phi, 'r' ); hold on;
     grid
     
-     %}
+  
     figure(3)
     semilogy((snr), CRLB_w); hold on;
     grid;
@@ -152,7 +152,7 @@ for i_1 = 1:8
     
 end
 
-%{
+
 figure(1)
 title('Preformance of \omega_{fft}'); 
 xlabel('SNR [dB]');  
@@ -166,7 +166,7 @@ xlabel('SNR [dB]')
 ylabel('var(\phi_{fft})') 
 legend('2^{10}', '2^{12}', '2^{14}', '2^{16}', '2^{18}', '2^{20}', 'CRLB');
 
-%}
+
 
 figure(3)
 title('\omega_{mle} using fminsearch')
