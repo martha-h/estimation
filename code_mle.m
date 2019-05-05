@@ -184,5 +184,5 @@ figure(4)
 title('$$\hat{\phi}_{mle}$$ using numerical search method', 'Interpreter',"latex")
 ylim([1e-06 0.139])
 xlabel('SNR [dB]') 
-ylabel('$$var(error_{\phi})$$', 'Interpreter',"latex"') 
+ylabel('$$var(error_{\phi})$$', 'Interpreter',"latex") 
 legend( '2^{10}', 'CRLB');
